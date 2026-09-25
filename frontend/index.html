@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disaster Guard - Emergency Management Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="logo">🚨 DisasterGuard Portal</div>
+        <div class="nav-links">
+            <span id="user-display" style="margin-right: 15px;"></span>
+            <button id="logout-btn" class="hidden" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="auth-screen" class="auth-container">
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchTab('user')">User Login</button>
+                <button class="tab-btn" onclick="switchTab('admin')">Admin Login</button>
+            </div>
+
+            <!-- User Login Form -->
+            <form id="user-login-form" onsubmit="handleUserLogin(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="user-name" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="user-phone" placeholder="Enter phone number" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login as Citizen</button>
+            </form>
+
+            <!-- Admin Login Form -->
+            <form id="admin-login-form" class="hidden" onsubmit="handleAdminLogin(event)">
+                <div class="form-group">
+                    <label>Admin Username</label>
+                    <input type="text" id="admin-user" placeholder="Enter admin username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="admin-pass" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login as Admin</button>
+                <p style="font-size: 0.8rem; color: var(--gray); margin-top: 8px;">(Default: admin / admin123)</p>
+            </form>
+        </div>
+
+        <!-- ================= USER DASHBOARD ================= -->
+        <div id="user-dashboard" class="dashboard">
+            <!-- Risk Alert Banner -->
+            <div id="risk-banner" class="risk-banner risk-low">
+                <div>
+                    <h2>Current Risk Level: <span id="user-risk-text">LOW</span></h2>
+                    <p id="risk-desc">No severe disaster warnings in your immediate area.</p>
+                </div>
+            </div>
+
+            <!-- Emergency SOS Signal Section -->
+            <div class="sos-box">
+                <h2 style="color: var(--danger);">EMERGENCY HELP (SOS)</h2>
+                <p style="margin: 10px 0; color: var(--gray);">In case of immediate danger, click the SOS button. Your live GPS coordinates will be sent directly to the Admin response team.</p>
+                <button class="sos-btn" onclick="triggerSOS()">SOS</button>
+                <p id="sos-status" style="margin-top: 10px; font-weight: bold;"></p>
+            </div>
+
+            <div class="grid">
+                <!-- Disaster Report Form -->
+                <div class="card">
+                    <h3>📢 Report a Disaster</h3>
+                    <form onsubmit="handleReportDisaster(event)">
+                        <div class="form-group">
+                            <label>Disaster Type</label>
+                            <select id="report-type" required>
+                                <option value="Flood">Flood</option>
+                                <option value="Fire">Fire</option>
+                                <option value="Earthquake">Earthquake</option>
+                                <option value="Landslide">Landslide</option>
+                                <option value="Cyclone">Cyclone</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Location / Area</label>
+                            <input type="text" id="report-location" placeholder="e.g. Sector 4, Main Street" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description & Urgent Needs</label>
+                            <textarea id="report-desc" rows="3" placeholder="Describe the current situation..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Submit Incident Report</button>
+                    </form>
+                </div>
+
+                <!-- Safe Shelters Nearby -->
+                <div class="card">
+                    <h3>🏠 Safe Nearby Shelters</h3>
+                    <ul id="user-shelter-list">
+                        <!-- Populated by JavaScript -->
+                    </ul>
+                </div>
+
+                <!-- Volunteer Sign-Up Form -->
+                <div class="card">
+                    <h3>🤝 Self Volunteer Registration</h3>
+                    <form onsubmit="handleVolunteerRegister(event)">
+                        <div class="form-group">
+                            <label>Skills & Field of Support</label>
+                            <select id="volunteer-skill" required>
+                                <option value="First Aid & Medical Support">First Aid & Medical Support</option>
+                                <option value="Search & Rescue Team">Search & Rescue Team</option>
+                                <option value="Food & Supply Distribution">Food & Supply Distribution</option>
+                                <option value="Logistics & Driving">Logistics & Driving</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Availability</label>
+                            <input type="text" id="volunteer-avail" placeholder="e.g. Immediate, Weekends" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Register as Volunteer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= ADMIN DASHBOARD ================= -->
+        <div id="admin-dashboard" class="dashboard">
+            <h2 style="margin-bottom: 1.5rem;">Admin Emergency Control Panel</h2>
+
+            <!-- Risk Level Control -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <h3>⚠️ Set Active Regional Risk Level</h3>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-success" onclick="updateRiskLevel('LOW')">Set Risk Level LOW</button>
+                    <button class="btn" style="background: var(--warning); color: white;" onclick="updateRiskLevel('MEDIUM')">Set Risk Level MEDIUM</button>
+                    <button class="btn btn-danger" onclick="updateRiskLevel('HIGH')">Set Risk Level HIGH</button>
+                </div>
+            </div>
+
+            <div class="grid">
+                <!-- Incoming Emergency SOS & Disaster Reports -->
+                <div class="card" style="grid-column: span 2;">
+                    <h3>🚨 Active Alerts & Incoming Disaster Reports</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Reporter</th>
+                                <th>Type</th>
+                                <th>Location / Coordinates</th>
+                                <th>Details</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-reports-table">
+                            <!-- Dynamically injected -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Active Safe Shelters Management -->
+                <div class="card">
+                    <h3>🏠 Active Safe Shelter Management</h3>
+                    <form onsubmit="handleAddShelter(event)" style="margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <input type="text" id="shelter-name" placeholder="Shelter Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="shelter-loc" placeholder="Location / Address" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" id="shelter-cap" placeholder="Total Capacity" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add New Shelter</button>
+                    </form>
+                    <ul id="admin-shelter-list">
+                        <!-- Dynamically injected -->
+                    </ul>
+                </div>
+
+                <!-- Volunteers & Rescue Team Applications -->
+                <div class="card" style="grid-column: span 2;">
+                    <h3>👥 Volunteer Applications & Rescue Personnel</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Skills</th>
+                                <th>Availability</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-volunteers-table">
+                            <!-- Dynamically injected -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="backend-connect.js"></script>
+</body>
+</html>
